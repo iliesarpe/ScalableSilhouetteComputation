@@ -7,3 +7,4 @@ python-kmedoids/
 logs/
 *.sif
 parser/
+examples/

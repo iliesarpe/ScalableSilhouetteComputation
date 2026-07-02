@@ -61,7 +61,7 @@ def build_config(points_path: str, labels_path: str, k: int, outdir: str) -> str
         "assignment": labels_path,
         "distance": "euclidean",
         "k": k,
-        "epsilon": 0.1,       # omit "epsilon" and set "t" directly if you'd rather
+		"t": 5,
         "delta": 0.01,        # fix the sample size yourself, see README
         "threads": 4,
         "seed": 100,
