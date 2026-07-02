@@ -1,0 +1,25 @@
+========================== BREAST
+https://archive.ics.uci.edu/static/public/17/breast+cancer+wisconsin+diagnostic.zip
+========================== WINE
+https://archive.ics.uci.edu/static/public/186/wine+quality.zip
+========================= CREDIT
+https://archive.ics.uci.edu/static/public/350/default+of+credit+card+clients.zip
+========================== SHUTTLE
+https://archive.ics.uci.edu/static/public/148/statlog+shuttle.zip
+1. uncompress shuttle.trn.Z
+========================= IOT
+https://archive.ics.uci.edu/static/public/942/rt-iot2022.zip
+========================== BioKDD
+https://kdd.org/cupfiles/KDDCupData/2004/data_kddcup04.tar.gz
+========================== RNA-seq
+https://static-content.springer.com/esm/art%3A10.1186%2F1471-2105-7-173/MediaObjects/12859_2005_912_MOESM6_ESM.gz //<-----
+------ Requires preprocessing, 
+1. polish first line and remove lines from 488565 onwards, 
+2. then open the file in vim and run ":%s/[0-9]://g" then remove null characters, 
+3. I used vim searching for them with /<CTRL-SHIFT-2>//g on mac or /<CTRL-2> ubuntu and then use the provided script
+========================= METRO
+https://archive.ics.uci.edu/static/public/791/metropt+3+dataset.zip
+========================== PH
+https://archive.ics.uci.edu/static/public/235/individual+household+electric+power+consumption.zip
+========================== GOW
+https://snap.stanford.edu/data/loc-gowalla_totalCheckins.txt.gz

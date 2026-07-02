@@ -1,0 +1,9 @@
+*.dSYM
+*.o
+efficientSilh
+tmp/
+python-kmedoids/
+*.slurm
+logs/
+*.sif
+parser/
