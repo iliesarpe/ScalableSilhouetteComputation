@@ -46,7 +46,7 @@ $$
 Different shapes represent $k=4$ different clusters, that is $\mathcal{C} = \\{C_1=\\{e_1,\dots,e_3,e_{14}\\}, C_2=\\{e_4,\dots,e_{10}\\},C_3=\\{e_{11},e_{12},e_{13}\\}, C_4=\\{e_{15}\\}\\}$.
 - _Right_: silhouette $s(e)$ of the elements $e\in V$ (where the distance is the Euclidean distance): 
 values are grouped by clusters and sorted. 
-The dashed line represents the value of the \emph{silhouette of the clustering} $\mathcal{C}$, marked with $s(\mathcal{C})$.
+The dashed line represents the value of the _silhouette of the clustering_ $\mathcal{C}$, marked with $s(\mathcal{C})$.
 <p align="center">
   <img src="plots/dataEx.png" width="45%">
   <img src="plots/Splot.png" width="45%">
