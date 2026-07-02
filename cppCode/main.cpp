@@ -93,6 +93,13 @@ int main(int argc, char *argv[])
 			k = 1 + *std::max_element(labels.begin(), labels.end()); // infer k from labels if not given
 		params.k = k;
 		params.clusterAssignments = Structures::BuildClusterAssignments(labels, k);
+		for(int i=0; i < params.clusterAssignments.size(); i++)
+		{
+			for(auto& pointIdx : params.clusterAssignments[i])
+			{
+				pointset[pointIdx].setClust(i);
+			}
+		}
 
 		// ---- Algorithm parameters ----
 		std::string distName = exe_spec.value("distance", std::string("euclidean"));
