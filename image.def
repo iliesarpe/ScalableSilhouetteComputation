@@ -1,0 +1,30 @@
+Bootstrap: docker
+From: mambaorg/micromamba:1.5
+
+%files
+  cppCode/environment.yml /usr/src/environment.yml
+
+%post
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update && apt-get install -y --no-install-recommends \
+    g++ make libhdf5-dev ca-certificates curl && \
+  rm -rf /var/lib/apt/lists/*
+
+  # Python environment from the project's environment.yml
+  micromamba install -y -n base -c conda-forge -f /usr/src/environment.yml
+
+  # nlohmann/json single-header needed at compile time (not vendored in repo)
+  mkdir -p /usr/local/include/nlohmann
+  curl -fsSL \
+    https://raw.githubusercontent.com/nlohmann/json/v3.11.3/single_include/nlohmann/json.hpp \
+    -o /usr/local/include/nlohmann/json.hpp
+
+  # C++ source is NOT copied here — it is bind-mounted at runtime.
+  # The Makefile and HDF5 lib paths are Ubuntu-compatible (/usr/include/hdf5/serial).
+
+%environment
+  export PATH="/opt/conda/bin:$PATH"
+  export LC_ALL=C
+
+%runscript
+  exec "$@"

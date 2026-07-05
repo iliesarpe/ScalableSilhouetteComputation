@@ -1,4 +1,7 @@
 name: silhouetteEnv
+channels:
+  - conda-forge
+  - defaults
 dependencies:
 - python==3.12.3
 - agate==1.13.0

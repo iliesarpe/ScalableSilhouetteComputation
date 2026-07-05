@@ -1,36 +1,7 @@
-Bootstrap: docker
-From: mambaorg/micromamba:1.5
-
-%files
-  . /usr/src/silhouette
-
-%post
-  export DEBIAN_FRONTEND=noninteractive
-  apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates curl g++ make libhdf5-dev && \
-  rm -rf /var/lib/apt/lists/*
-
-  # --- Python environment ---------------------------------------------------
-  # Minimal set for the demo / library usage.  Full research-pipeline packages
-  # are in environment.yml; install those separately with micromamba env create.
-  micromamba install -y -n base -c conda-forge \
-    python=3.12 numpy scikit-learn matplotlib seaborn h5py
-
-  # --- nlohmann/json single-header (not vendored in the repo) ---------------
-  mkdir -p /usr/local/include/nlohmann
-  curl -fsSL \
-    https://raw.githubusercontent.com/nlohmann/json/v3.11.3/single_include/nlohmann/json.hpp \
-    -o /usr/local/include/nlohmann/json.hpp
-
-  # --- C++ binary -----------------------------------------------------------
-  # %files copies the contents of cppCode/ directly into /usr/src/silhouette/,
-  # so Makefile, main.cpp, libs/, import/ etc. are at that level.
-  # HighFive is vendored in import/; only libhdf5-dev is needed from apt.
-  cd /usr/src/silhouette && make
-
-%environment
-  export PATH="/opt/conda/bin:$PATH"
-  export LC_ALL=C
-
-%runscript
-  /usr/src/silhouette/efficientSilh "$@"
+# This file has moved to the repository root (image.def).
+#
+# Build from the repo root:
+#   apptainer build image.sif image.def
+#
+# The root image.def does not bake source code into the container; cppCode/ is
+# bind-mounted at runtime so Python scripts can be edited without rebuilding.
