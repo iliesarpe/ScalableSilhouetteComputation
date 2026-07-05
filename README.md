@@ -6,10 +6,10 @@
 ## Table of Contents
 - [Overview](#overview)
 - [Installation](#installation)
+- [General use](#general-use)
 - [Datasets](#datasets)
 - [Results](#results)
-- [Example analyses](#Example-analyses)
-- [General use](#General-use)
+- [Example analyses](#example-analyses)
 
 <!-- ABOUT THE PROJECT -->
 ## Overview
@@ -73,58 +73,119 @@ If you rely on our code please consider citing our work
 
 You can compile and use our code in two ways:  
 1. **From source (Python + C++)**  
-2. **Using Apptainer (recommended for reproducibility and ease of setup)**
-
-**Note!** Our code was tested on a system running Ubuntu 20.04.
+2. **Using Apptainer (recommended for reproducibility and HPC clusters)**
 
 ---
 
-### Option 1: direct C++ compilation + Python setup
-Requirements:  
-- **C++17 or later** (`g++` compiler)  
+### Option 1: Direct C++ compilation + Python setup
 
-Steps:  
+#### Linux (Ubuntu/Debian)
+
 ```bash
-# Clone repository
-git clone <ourrepo>
-cd cppCode
-
-# Build C++ executable
-make
+sudo apt install g++ make libhdf5-dev nlohmann-json3-dev
 ```
 
-#### Python environment
-##### Option A — Using Conda (recommended)
-
-Create an environment from the YAML file:
+#### macOS
 
 ```bash
-# Create from environment.yml (will use the python version listed there if present)
-conda env create -f cppCode/environment.yml
+brew install hdf5 libomp nlohmann-json
+```
 
-# Activate
+#### Build
+
+```bash
+git clone <ourrepo>
+cd cppCode
+make          # produces ./efficientSilh
+```
+
+The Makefile detects the platform automatically and selects the correct HDF5 and OpenMP paths.
+
+#### Python environment
+
+```bash
+conda env create -f cppCode/environment.yml
 conda activate silhouetteEnv
 ```
 
-#### Option B — Using Python
-```bash
-# Create requirements.txt from a YAML that has lines like "- pkg==x.y.z" under "dependencies:"
-grep '^- ' environment.yml | sed 's/- //' > requirements.txt
-```
-
-
+---
 
 ### Option 2: Apptainer
-Requirements:  
-- [Apptainer](https://apptainer.org/)
+
+Requirements: [Apptainer](https://apptainer.org/)
+
+`image.def` is located at the **repository root**. It installs the full C++ toolchain and Python environment inside the container but does **not** bake the source code in — the source is bind-mounted at runtime, so Python scripts can be edited without rebuilding the image.
 
 ```bash
-# Build the container
+# Build from the repository root
 apptainer build image.sif image.def
 ```
 
-Now you can use your `image.sif` as an exacutable
+On HPC clusters with SLURM, use the provided submission script:
 
+```bash
+# Submit from the repository root
+sbatch slurm_launcher.slurm
+```
+
+The script compiles `efficientSilh` inside the container on the first run and caches the binary in `cppCode/`. Subsequent runs skip compilation.
+
+[Back to top](#table-of-contents)
+
+## General use <a name="general-use"></a>
+
+The binary `efficientSilh` is driven by a JSON configuration file:
+
+```bash
+./efficientSilh config.json
+```
+
+The easiest way to understand the configuration format is to run the quickstart demo (see [Example analyses](#example-analyses)), which generates one config file per `k` value and prints the path so you can inspect it directly.
+
+### Configuration reference
+
+```json
+{
+  "mode": 4,
+  "dataset":    "points.csv",
+  "assignment": "labels.csv",
+  "distance":   "euclidean",
+  "k":          10,
+  "t":          64,
+  "delta":      0.01,
+  "threads":    1,
+  "seed":       100,
+  "outfile":    "result.json"
+}
+```
+
+| Field | Description |
+|---|---|
+| `mode` | Always `4` for standalone (general) use |
+| `dataset` | CSV of floating-point features — no header, one point per row |
+| `assignment` | CSV of integer cluster labels — one label per row, 0-indexed |
+| `distance` | One of `euclidean`, `squared`, `manhattan`, `cosine`, `canberra` |
+| `k` | Number of clusters |
+| `t` | Sample size (number of PPS samples per cluster). Use this **or** `epsilon`: when possible **always** set `t` |
+| `epsilon` | Approximation parameter; `t` is derived automatically from the sample-complexity bound |
+| `delta` | Failure probability for the approximation guarantee |
+| `threads` | Number of OpenMP threads |
+| `seed` | RNG seed for reproducibility |
+| `outfile` | Path where the JSON result is written |
+
+The result JSON contains the estimated global silhouette (`global_silhouette`), per-point local silhouettes (`local_silhouette`), and runtime information.
+
+The plots below are produced by the quickstart demo (see [Example analyses](#example-analyses)) on a synthetic 5-cluster dataset with $t=64$ samples per cluster:
+
+<p align="center">
+  <img src="plots/silhouette_distribution.png" width="90%"><br>
+  <em>Per-cluster silhouette distributions for k ∈ {2,…,8}. At k=5 (the true number of clusters) all clusters show uniformly high silhouette values and the estimated average is clearly the largest.</em>
+</p>
+
+<p align="center">
+  <img src="plots/silhouette_avg_vs_k.png" width="50%"><br>
+  <em>Estimated average silhouette vs k. The peak at k=5 correctly identifies the true cluster count.</em>
+</p>
 
 [Back to top](#table-of-contents)
 
@@ -156,39 +217,64 @@ The above command will generate a [HDF5](https://github.com/HDFGroup/hdf5) file 
 To reproduce our results, first make sure that the downloading and processing of the datasets, has been done as described in [Datasets](#datasets).
 Next go to `cppCode/` and make sure the Python environment `silhouetteEnv` and run:
 ```bash
-#Compute the exact silhouette values of all points for each clustering configuration
-python driver.py ex-silh-real.py
+# Compute the exact silhouette values of all points for each clustering configuration
+python driver.py ex-silh-real
 ```
 
 1. Reproducing the sequential results for local and global estimation
 ```bash
 # Compute the local and global silhouette, comparing our methods and existing state-of-the-art approaches
-python driver.py approx-silh-real-ex.py
+python driver.py approx-silh-real-ex
 ```
 2. Reproducing the parallel experiments 
 ```bash
 # Perform parallel tests
-python driver.py parallel-tests.py
+python driver.py parallel-tests
 ```
 3. Reproducing the results for the selection of the best parameter $k$ 
 ```bash
 # Obtain clusterings
-python driver.py clust-bestk.py
+python driver.py clust-bestk
 
 # Obtain exact values of the silhouette 
-python driver.py ex-silh-bestk.py
+python driver.py ex-silh-bestk
 
 # Obtain approximate values comparing PPS and UNI
-python driver.py approx-silh-bestk.py
+python driver.py approx-silh-bestk
 ```
 
 
 [Back to top](#table-of-contents)
 
-## Example analysies <a name="Example-analyses"></a> 
+## Example analyses <a name="example-analyses"></a>
 
-## General use <a name="General-use"></a> 
-Here we will specify how to use our tool for datasets outside the ones the ones tested in our experiments.
+### Quickstart: best-$k$ selection on a synthetic dataset
 
+`cppCode/quickstart.py` is a self-contained demo that requires no external data download. It generates a 2000-point, 8-dimensional dataset with 5 true clusters (`sklearn.datasets.make_blobs`) and runs `ApproximateSilhPPS` across a range of $k$ values using only $t=64$ samples per cluster, producing two plots:
+
+- **`silhouette_distribution.png`** — classic silhouette diagram: per-cluster distributions sorted by silhouette value, one panel per $k$
+- **`silhouette_avg_vs_k.png`** — estimated average silhouette $\hat{s}(\mathcal{C})$ vs $k$, with the best $k$ highlighted
+
+```bash
+cd cppCode
+
+# default sweep: k ∈ {2, 3, 4, 5, 6, 7, 8} — true best k is 5
+python quickstart.py --run ./efficientSilh
+
+# save plots directly to the repo plots/ folder
+python quickstart.py --run ./efficientSilh --plots-dir ../plots
+
+# custom k range
+python quickstart.py --run ./efficientSilh --k-values 2 4 6 8 10
+```
+
+Running without `--run` writes only the JSON config files to `examples/out/` and prints their paths — useful for understanding the configuration format without needing the binary compiled.
+
+```bash
+# Print configs only (no binary required)
+python quickstart.py
+```
+
+The generated `examples/out/blobs_config_k*.json` files show exactly how to structure the configuration for mode 4, and are the recommended starting point for adapting the tool to your own dataset.
 
 [Back to top](#table-of-contents)
