@@ -5,33 +5,34 @@ From: ubuntu:jammy-20230301
   . /usr/src/silhouette
 
 %post
-  apt-get update
-  apt-get install -y \
-    git \
-    curl \
-    make \
-    cmake \
-    g++ \
-    libboost-all-dev \
-    libhdf5-dev
+  apt-get update && apt-get install -y --no-install-recommends \
+    bzip2 ca-certificates curl g++ make libhdf5-dev && \
+  rm -rf /var/lib/apt/lists/*
 
-  # Install HighFive
-  cd /usr/src/
-  git clone https://github.com/BlueBrain/HighFive.git
-  cd HighFive
-  git checkout 4638084fc017f693e46d9349977044964f562daa
-  mkdir build && cd build
-  cmake .. -DHIGHFIVE_EXAMPLES=OFF
-  make install
+  # --- micromamba -----------------------------------------------------------
+  curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest \
+    | tar -xvj -C /usr/local/bin --strip-components=1 bin/micromamba
 
-  # Install Json for modern C++
-  mkdir /usr/local/include/nlohmann
-  cd /usr/local/include/nlohmann
-  curl -O https://raw.githubusercontent.com/nlohmann/json/develop/single_include/nlohmann/json.hpp
-  
-  # Compile C++
-  cd /usr/src/silhouette
-  make
+  # Minimal Python environment (demo / library usage).
+  # Full research-pipeline packages are in environment.yml; install those
+  # separately with: micromamba env create -f cppCode/environment.yml
+  MAMBA_ROOT_PREFIX=/opt/mamba micromamba create -y \
+    -p /opt/silhenv \
+    -c conda-forge \
+    python=3.12 numpy scikit-learn matplotlib seaborn h5py
+
+  # --- nlohmann/json single-header (not vendored in the repo) --------------
+  mkdir -p /usr/local/include/nlohmann
+  curl -fsSL \
+    https://raw.githubusercontent.com/nlohmann/json/v3.11.3/single_include/nlohmann/json.hpp \
+    -o /usr/local/include/nlohmann/json.hpp
+
+  # --- C++ binary -----------------------------------------------------------
+  # HighFive is vendored in cppCode/import/; only libhdf5-dev is needed from apt.
+  cd /usr/src/silhouette/cppCode && make
+
+%environment
+  export PATH="/opt/silhenv/bin:$PATH"
 
 %runscript
- /usr/src/silhouette/efficientSilh $@
+  /usr/src/silhouette/cppCode/efficientSilh "$@"

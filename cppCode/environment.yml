@@ -28,7 +28,9 @@ dependencies:
 - python-slugify==8.0.4
 - pytimeparse==1.1.8
 - pytz==2025.1
+- matplotlib==3.10.1
 - scikit-learn==1.6.1
+- seaborn==0.13.2
 - scipy==1.15.2
 - six==1.17.0
 - SQLAlchemy==2.0.41
