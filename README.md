@@ -23,9 +23,9 @@ The table below summarises our estimators for the global silhouette and their gu
 
 | C++ function | Estimator | Guarantee | Distance computations | Probability |
 |---|---|---|---|---|
-| `ComputeEstimatorSubsample` | $\hat{s}_1$ | $\lVert\hat{s}_1 - s(\mathcal{C})\rVert \le \varepsilon$ | $O\!\left(\frac{n}{\varepsilon^2}\log\frac{1}{\delta}\right)$ | $> 1-\delta$ |
-| `ApproximateSilhPPS` | $\hat{s}_2$ | $\lVert\hat{s}_2 - s(\mathcal{C})\rVert \le \frac{4\varepsilon}{1-\varepsilon}$ | $O\!\left(\frac{nk}{\varepsilon^2}\log\frac{nk}{\delta}\right)$ | $> 1-\delta$ |
-| `ApproximateSilhPPS` | $\hat{s}_3$ | $\lVert\hat{s}_3 - s(\mathcal{C})\rVert \le \frac{4\varepsilon_1}{1-\varepsilon_1} + \varepsilon_2$ | $O\!\left(\!\left(n+\frac{m k}{\varepsilon_1^2}\right)\log\frac{nk}{\delta_1}\right)$ | $> (1-\delta_1)(1-\delta_2)$ |
+| `ComputeEstimatorSubsample` | $\hat{s}_1$ | $\|\hat{s}_1 - s(\mathcal{C})\| \le \varepsilon$ | $O\left(\frac{n}{\varepsilon^2}\log\frac{1}{\delta}\right)$ | $> 1-\delta$ |
+| `ApproximateSilhPPS` | $\hat{s}_2$ | $\|\hat{s}_2 - s(\mathcal{C})\| \le \frac{4\varepsilon}{1-\varepsilon}$ | $O\!\left(\frac{nk}{\varepsilon^2}\log\frac{nk}{\delta}\right)$ | $> 1-\delta$ |
+| `ApproximateSilhPPS` | $\hat{s}_3$ | $\|\hat{s}_3 - s(\mathcal{C})\| \le \frac{4\varepsilon_1}{1-\varepsilon_1} + \varepsilon_2$ | $O\left(\left(n+\frac{m k}{\varepsilon_1^2}\right)\log\frac{nk}{\delta_1}\right)$ | $> (1-\delta_1)(1-\delta_2)$ |
 
 ---
 
