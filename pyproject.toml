@@ -46,5 +46,4 @@ manylinux-x86_64-image = "manylinux_2_28"
 # Disable OpenMP for macOS wheels: avoids bundling Homebrew libomp into the
 # wheel (delocate complexity) and the dual-runtime conflict with sklearn.
 # Users who need threading can rebuild from source with libomp installed.
-environment = { CMAKE_ARGS = "-DCMAKE_DISABLE_FIND_PACKAGE_OpenMP=TRUE",
-                KMP_DUPLICATE_LIB_OK = "TRUE" }
+environment = { CMAKE_ARGS = "-DCMAKE_DISABLE_FIND_PACKAGE_OpenMP=TRUE", KMP_DUPLICATE_LIB_OK = "TRUE" }
