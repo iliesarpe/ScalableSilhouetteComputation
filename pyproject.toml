@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "silhouette-scalable"
-version = "0.1.0"
+version = "0.1.1"
 description = "Scalable approximate silhouette scoring for k-clusterings under arbitrary metric distances"
 readme = "README.md"
 license = {file = "License.txt"}
