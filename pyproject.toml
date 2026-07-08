@@ -20,7 +20,7 @@ dev  = ["pytest>=7", "scikit-learn>=1.0"]
 
 [tool.scikit-build]
 cmake.build-type = "Release"
-wheel.packages = ["src/silhouette_approx"]
+wheel.packages = ["src/silhouette_scalable"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

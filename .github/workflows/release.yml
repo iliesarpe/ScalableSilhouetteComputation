@@ -19,10 +19,8 @@ jobs:
         include:
           - os: ubuntu-22.04
             cibw_archs: x86_64
-          - os: macos-14       # GitHub's arm64 runner
+          - os: macos-14       # arm64 — Intel Mac users fall back via Rosetta 2
             cibw_archs: arm64
-          - os: macos-13       # GitHub's x86_64 runner
-            cibw_archs: x86_64
 
     steps:
       - uses: actions/checkout@v4

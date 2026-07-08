@@ -44,5 +44,5 @@ if(OpenMP_CXX_FOUND)
 endif()
 
 # Install the extension into the wheel's package directory.
-# scikit-build-core maps this to silhouette_approx/ inside the wheel.
-install(TARGETS _silhouette_approx DESTINATION silhouette_approx)
+# scikit-build-core maps this to silhouette_scalable/ inside the wheel.
+install(TARGETS _silhouette_approx DESTINATION silhouette_scalable)

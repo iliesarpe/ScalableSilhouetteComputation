@@ -7,7 +7,7 @@ All tests use small n and small t so the suite finishes in a few seconds.
 import numpy as np
 import pytest
 
-import silhouette_approx as sa
+import silhouette_scalable as sa
 
 
 # ---------------------------------------------------------------------------
