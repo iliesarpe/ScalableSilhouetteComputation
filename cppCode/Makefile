@@ -44,14 +44,25 @@ ALL_LIBS = $(HDF5_LIB) $(OMP_LIB) -lhdf5
 # --------------------------------------------------------------------------- #
 # Targets
 # --------------------------------------------------------------------------- #
+# Full research build: includes HDF5 support (modes 1-3) and the standalone mode (4).
 all: main.cpp $(FOLLIBS)structures.h structures.o $(FOLLIBS)algorithms.h algorithms.o
-	$(CC) $(CFLAGS) main.cpp structures.o algorithms.o -o $(EXEC) $(ALL_INC) $(ALL_LIBS)
+	$(CC) $(CFLAGS) -DUSE_HDF5 main.cpp structures.o algorithms.o -o $(EXEC) $(ALL_INC) $(ALL_LIBS)
 
 structures.o: $(FOLLIBS)structures.cpp
-	$(CC) -c $(CFLAGS) $(FOLLIBS)structures.cpp $(ALL_INC)
+	$(CC) -c $(CFLAGS) -DUSE_HDF5 $(FOLLIBS)structures.cpp $(ALL_INC)
 
 algorithms.o: $(FOLLIBS)algorithms.h structures.o $(FOLLIBS)algorithms.cpp
-	$(CC) -c $(CFLAGS) $(FOLLIBS)algorithms.cpp $(ALL_INC)
+	$(CC) -c $(CFLAGS) -DUSE_HDF5 $(FOLLIBS)algorithms.cpp $(ALL_INC)
+
+# Pip/library build: no HDF5, only standalone mode (4). Used by CMake / pybind11.
+pip: main.cpp $(FOLLIBS)structures.h structures_nohdf5.o $(FOLLIBS)algorithms.h algorithms_nohdf5.o
+	$(CC) $(CFLAGS) main.cpp structures_nohdf5.o algorithms_nohdf5.o -o $(EXEC) $(ALL_INC) $(OMP_LIB)
+
+structures_nohdf5.o: $(FOLLIBS)structures.cpp
+	$(CC) -c $(CFLAGS) $(FOLLIBS)structures.cpp -o structures_nohdf5.o $(ALL_INC)
+
+algorithms_nohdf5.o: $(FOLLIBS)algorithms.h structures_nohdf5.o $(FOLLIBS)algorithms.cpp
+	$(CC) -c $(CFLAGS) $(FOLLIBS)algorithms.cpp -o algorithms_nohdf5.o $(ALL_INC)
 
 clean:
 	rm -f $(EXEC) *.o

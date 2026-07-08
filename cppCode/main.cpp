@@ -6,7 +6,9 @@
 #include <fstream>
 #include <iomanip>
 #include <nlohmann/json.hpp>
+#ifdef USE_HDF5
 #include <highfive/H5Easy.hpp>
+#endif
 
 using json = nlohmann::json;
 using Structures::AlgorithmParameters;
@@ -53,8 +55,8 @@ int main(int argc, char *argv[])
       // ---- Load points: plain CSV (no header) or a flat HDF5 "dataset" array ----
 		std::vector<Structures::Point<double>> pointset;
 		AlgorithmParameters params;
+#ifdef USE_HDF5
 		bool pointsFromHDF5 = HasExtension(fpoints, ".h5") || HasExtension(fpoints, ".hdf5");
-
 		std::unique_ptr<H5Easy::File> hdf5File; // kept alive only if the input is HDF5
 		if(pointsFromHDF5)
 		{
@@ -65,6 +67,10 @@ int main(int argc, char *argv[])
 		{
 			pointset = Structures::BuildDatasetRaw(fpoints); // plain CSV, one point per line
 		}
+#else
+		constexpr bool pointsFromHDF5 = false;
+		pointset = Structures::BuildDatasetRaw(fpoints); // plain CSV, one point per line
+#endif
 		long long int n = static_cast<long long int>(pointset.size());
 		if(n == 0)
 		{
@@ -76,9 +82,11 @@ int main(int argc, char *argv[])
 		// ---- Load the cluster assignment: CSV (one cluster id per line) or a flat HDF5 dataset ----
 		std::string assignPath = exe_spec["assignment"].get<std::string>();
 		std::vector<int> labels;
+#ifdef USE_HDF5
 		if(pointsFromHDF5 && exe_spec.value("assignmentInHDF5", true))
 			labels = Structures::LoadLabelsHDF5(*hdf5File, assignPath); // assignPath is an in-file dataset path, e.g. "/assignment"
 		else
+#endif
 			labels = Structures::LoadLabelsCSV(assignPath); // assignPath is a file on disk
 
 		if(static_cast<long long int>(labels.size()) != n)
@@ -154,6 +162,7 @@ int main(int argc, char *argv[])
 		std::cout << "Done in " << wallSeconds << "s. Global silhouette estimate ~= " << res.approxSilh
 		           << ". Results written to " << outPath << std::endl;
    }
+#ifdef USE_HDF5
    else if(dataTocluster == 1) // Compute Exact Silh
 	{
 		H5Easy::DumpOptions options{H5Easy::Compression()};
@@ -884,5 +893,6 @@ int main(int argc, char *argv[])
 		outj << out << '\n';
 		outj.close();
 	}
+#endif // USE_HDF5
     	return 0;
 }

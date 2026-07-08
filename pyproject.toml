@@ -1,0 +1,50 @@
+[build-system]
+requires = ["scikit-build-core>=0.9", "pybind11>=2.13", "cmake>=3.18"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "silhouette-scalable"
+version = "0.1.0"
+description = "Scalable approximate silhouette scoring for k-clusterings under arbitrary metric distances"
+readme = "README.md"
+license = {file = "License.txt"}
+authors = [
+    {name = "iliesarpe", email = "ilie945@gmail.com"}
+]
+requires-python = ">=3.9"
+dependencies = ["numpy>=1.21"]
+
+[project.optional-dependencies]
+plot = ["matplotlib>=3.5", "seaborn>=0.12"]
+dev  = ["pytest>=7", "scikit-learn>=1.0"]
+
+[tool.scikit-build]
+cmake.build-type = "Release"
+wheel.packages = ["src/silhouette_approx"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+# ---------------------------------------------------------------------------
+# cibuildwheel — pre-compiled wheel configuration
+# ---------------------------------------------------------------------------
+
+[tool.cibuildwheel]
+# Build for Python 3.9–3.13 on 64-bit targets only.
+build  = "cp39-* cp310-* cp311-* cp312-* cp313-*"
+skip   = "*-musllinux* *-win32 *-manylinux_i686"
+
+# Install test dependencies and run the suite against the installed wheel.
+test-requires = ["pytest", "scikit-learn"]
+test-command  = "pytest {project}/tests -x -q"
+
+[tool.cibuildwheel.linux]
+# manylinux_2_28 (AlmaLinux 8) ships GCC with OpenMP — no extra setup needed.
+manylinux-x86_64-image = "manylinux_2_28"
+
+[tool.cibuildwheel.macos]
+# Disable OpenMP for macOS wheels: avoids bundling Homebrew libomp into the
+# wheel (delocate complexity) and the dual-runtime conflict with sklearn.
+# Users who need threading can rebuild from source with libomp installed.
+environment = { CMAKE_ARGS = "-DCMAKE_DISABLE_FIND_PACKAGE_OpenMP=TRUE",
+                KMP_DUPLICATE_LIB_OK = "TRUE" }

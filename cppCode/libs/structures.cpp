@@ -24,6 +24,7 @@ std::vector<Structures::Point<double>> Structures::BuildDatasetRaw(std::string f
 	return dataset;
 }
 
+#ifdef USE_HDF5
 std::vector<Structures::Point<double>> Structures::BuildDatasetRaw(H5Easy::File& datafile, AlgorithmParameters& params)
 {
 	std::vector<std::vector<double>> pointsRaw = H5Easy::load<std::vector<std::vector<double>>>(datafile, "dataset");
@@ -91,6 +92,7 @@ void Structures::LoadClustering(H5Easy::File& datafile, AlgorithmParameters& par
 
 	return;
 }
+#endif // USE_HDF5
 
 std::vector<int> Structures::LoadLabelsCSV(std::string fname)
 {
@@ -111,11 +113,13 @@ std::vector<int> Structures::LoadLabelsCSV(std::string fname)
 	return labels;
 }
 
+#ifdef USE_HDF5
 std::vector<int> Structures::LoadLabelsHDF5(H5Easy::File& datafile, std::string path)
 {
 	return H5Easy::load<std::vector<int>>(datafile, path);
 }
- 
+#endif // USE_HDF5
+
 std::vector<std::vector<long long int>> Structures::BuildClusterAssignments(const std::vector<int>& labels, int k)
 {
 	std::vector<std::vector<long long int>> clusterAssignments(k);
@@ -137,6 +141,7 @@ std::vector<std::vector<long long int>> Structures::BuildClusterAssignments(cons
 
 
 
+#ifdef USE_HDF5
 //void dumpHDF5(std::vector<Structures::Point<double>>& pointset, std::string outfilename)
 void Structures::dumpHDF5(std::vector<Structures::Point<double>>& pointset, H5Easy::File& outfile, int type)
 {
@@ -176,6 +181,6 @@ void Structures::dumpHDF5(std::vector<Structures::Point<double>>& pointset, H5Ea
 	H5Easy::dump(file, "/statistics/temporal/degree/in", temporal_in_degrees(), options);
 	std::cerr << "Done" << std::endl;
 	*/
-	
-}
 
+}
+#endif // USE_HDF5

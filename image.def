@@ -2,7 +2,7 @@ Bootstrap: docker
 From: mambaorg/micromamba:1.5
 
 %files
-  cppCode/environment.yml /usr/src/environment.yml
+  research/environment.yml /usr/src/environment.yml
 
 %post
   export DEBIAN_FRONTEND=noninteractive

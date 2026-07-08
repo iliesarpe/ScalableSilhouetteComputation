@@ -328,10 +328,35 @@ void Algorithms::ApproximateSilhPPS(std::vector<Point<double>>& pointset, Algori
 	res.stepART = totRT1.count();
 	//std::cout << "Step 1 RT: " << res.stepART << " vs " << totRT1.count() << std::endl;
 
-    //int modeEstimator = params.mode;
     tStart = std::chrono::steady_clock::now();
-	std::vector<double> estimateSilh(n);
 	double estimate = 0;
+
+	if (params.globalOnly)
+	{
+		// Fast global path: evaluate only m randomly chosen points — O(m) instead of O(n).
+		// When globalM <= 0 or >= n, fall back to evaluating all n points.
+		long long int m = (params.globalM > 0 && params.globalM < n) ? params.globalM : n;
+		std::uniform_int_distribution<long long int> distrib(0, n - 1);
+		for (long long int i = 0; i < m; i++)
+		{
+			long long int pos = (params.globalM > 0 && params.globalM < n) ? distrib(gen) : i;
+			auto vals = GetEstimateTerms(std::cref(weightedSamplePPS), std::cref(pointset),
+			                             pointset[pos], std::cref(clusterAssignments), distanceType);
+			double aHat = vals.first;
+			double bHat = vals.second;
+			estimate += (bHat - aHat) / std::max(bHat, aHat);
+		}
+		estimate /= m;
+		auto tFinish2 = std::chrono::steady_clock::now();
+		std::chrono::duration<double> totRT2 = tFinish2 - tStart;
+		res.silhApproxValues.clear();
+		res.approxSilh  = estimate;
+		res.totRTEst1   = res.stepART + totRT2.count();
+		return;
+	}
+
+	// Local path: evaluate all n points and return per-point silhouette values.
+	std::vector<double> estimateSilh(n);
 	#pragma omp parallel for num_threads(threads)
 	for(int i=0; i < n; i++)
 	{
@@ -339,12 +364,6 @@ void Algorithms::ApproximateSilhPPS(std::vector<Point<double>>& pointset, Algori
 		double aHat = vals.first;
 		double bHat = vals.second;
 		double sHat = (bHat - aHat)/(std::max(bHat, aHat));
-		/*
-		if(i==0)
-		{
-			std::cout << i << " " << aHat << " " << bHat << " " << sHat << '\n';
-		}
-		*/
 		#pragma omp critical
 		estimateSilh[i] = sHat;
 		#pragma omp critical
@@ -353,30 +372,23 @@ void Algorithms::ApproximateSilhPPS(std::vector<Point<double>>& pointset, Algori
 	estimate /= n;
     tFinish = std::chrono::steady_clock::now();
     std::chrono::duration<double> totRT = tFinish-tStart;
-	//std::cout << "Step 2 RT: " << totRT.count() << std::endl;
-
 
 	res.silhApproxValues.clear();
 	res.silhApproxValues = estimateSilh;
 	res.approxSilh = estimate;
 	res.totRTEst1 = res.stepART + totRT.count();
 
-	//int mSizeEst3 = params.sampleSizeDouble;
-
 	std::vector<long long int> samp3 = params.sampleSizeDouble;
 	for(auto mSizeEst3 : samp3)
 	{
 		tStart = std::chrono::steady_clock::now();
 		estimate = 0;
-		std::uniform_int_distribution<> distrib(0, n-1); // [a,b] uniform int in [0,n-1];
+		std::uniform_int_distribution<> distrib(0, n-1);
 		std::vector<long long int> posSelected;
 		for(int i=0; i < mSizeEst3; i++)
 		{
 			posSelected.push_back(distrib(gen));
 		}
-		//std::vector<long long int> posSelected = sublinearBinomialSample(n, params.sampleSizeFullWithSampl, std::ref(gen));
-
-		//long long int selectedSize = posSelected.size();
 		for(auto& pos : posSelected)
 		{
 			auto vals = GetEstimateTerms(std::cref(weightedSamplePPS), std::cref(pointset), pointset[pos], std::cref(clusterAssignments), distanceType);
@@ -385,14 +397,10 @@ void Algorithms::ApproximateSilhPPS(std::vector<Point<double>>& pointset, Algori
 			double sHat = (bHat - aHat)/(std::max(bHat, aHat));
 			estimate += sHat;
 		}
-		//estimate /= selectedSize;
 		estimate = estimate / mSizeEst3;
 		tFinish = std::chrono::steady_clock::now();
-
 		totRT = tFinish-tStart;
-		//std::cout << "Step 3 RT: " << totRT.count() << std::endl;
 		res.multipleM.push_back(estimate);
-		//res.totRTEst3 = res.stepART + totRT.count();
 		res.totRTEst3.push_back(res.stepART + totRT.count());
 	}
 	return;

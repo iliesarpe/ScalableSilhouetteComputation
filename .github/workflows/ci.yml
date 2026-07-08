@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main, pip-packaging]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    name: Build & test / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux — OpenMP via libgomp (GCC), no extra setup needed.
+          - os: ubuntu-22.04
+            cmake_args: ""
+          # macOS arm64 — disable OpenMP to avoid libomp bundling complexity.
+          - os: macos-14
+            cmake_args: "-DCMAKE_DISABLE_FIND_PACKAGE_OpenMP=TRUE"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install package and dev dependencies
+        run: pip install ".[dev]"
+        env:
+          CMAKE_ARGS: ${{ matrix.cmake_args }}
+
+      - name: Run tests
+        run: pytest tests/ -x -q
+        env:
+          KMP_DUPLICATE_LIB_OK: "TRUE"   # harmless guard for macOS dual-libomp

@@ -41,18 +41,22 @@ fi
 # The compiled binary is at ./efficientSilh relative to --pwd.
 # ---------------------------------------------------------------------------
 
-# --- Quickstart demo: best-k on digits, produces PDF plots ------------------
+RESEARCH="${REPO_ROOT}/research"
+
+# --- Quickstart demo: best-k on synthetic blobs, produces PNG plots ---------
 apptainer exec --fakeroot \
     -B "${CPPCODE}/:${container_home}:rw" \
+    -B "${REPO_ROOT}/examples:${container_home}/examples:ro" \
     --pwd "${container_home}" \
     "${SIF}" \
-    python quickstart.py --run ./efficientSilh --k-values 2 4 6 8 10
+    python examples/quickstart.py --run ./efficientSilh --k-values 2 4 6 8 10
 
 # --- Full experiment pipeline (uncomment the relevant step) -----------------
-#apptainer exec --fakeroot -B "${CPPCODE}/:${container_home}:rw" --pwd "${container_home}" "${SIF}" python driver.py clust-real
-#apptainer exec --fakeroot -B "${CPPCODE}/:${container_home}:rw" --pwd "${container_home}" "${SIF}" python driver.py ex-silh-real
-#apptainer exec --fakeroot -B "${CPPCODE}/:${container_home}:rw" --pwd "${container_home}" "${SIF}" python driver.py approx-silh-real-ex
-#apptainer exec --fakeroot -B "${CPPCODE}/:${container_home}:rw" --pwd "${container_home}" "${SIF}" python driver.py parallel-tests
-#apptainer exec --fakeroot -B "${CPPCODE}/:${container_home}:rw" --pwd "${container_home}" "${SIF}" python driver.py clust-bestk
-#apptainer exec --fakeroot -B "${CPPCODE}/:${container_home}:rw" --pwd "${container_home}" "${SIF}" python driver.py ex-silh-bestk
-#apptainer exec --fakeroot -B "${CPPCODE}/:${container_home}:rw" --pwd "${container_home}" "${SIF}" python driver.py approx-silh-bestk
+# Research scripts now live in research/; bind-mount it alongside cppCode/.
+#apptainer exec --fakeroot -B "${CPPCODE}/:${container_home}:rw" -B "${RESEARCH}:${container_home}/research:rw" --pwd "${container_home}" "${SIF}" python research/driver.py clust-real
+#apptainer exec --fakeroot -B "${CPPCODE}/:${container_home}:rw" -B "${RESEARCH}:${container_home}/research:rw" --pwd "${container_home}" "${SIF}" python research/driver.py ex-silh-real
+#apptainer exec --fakeroot -B "${CPPCODE}/:${container_home}:rw" -B "${RESEARCH}:${container_home}/research:rw" --pwd "${container_home}" "${SIF}" python research/driver.py approx-silh-real-ex
+#apptainer exec --fakeroot -B "${CPPCODE}/:${container_home}:rw" -B "${RESEARCH}:${container_home}/research:rw" --pwd "${container_home}" "${SIF}" python research/driver.py parallel-tests
+#apptainer exec --fakeroot -B "${CPPCODE}/:${container_home}:rw" -B "${RESEARCH}:${container_home}/research:rw" --pwd "${container_home}" "${SIF}" python research/driver.py clust-bestk
+#apptainer exec --fakeroot -B "${CPPCODE}/:${container_home}:rw" -B "${RESEARCH}:${container_home}/research:rw" --pwd "${container_home}" "${SIF}" python research/driver.py ex-silh-bestk
+#apptainer exec --fakeroot -B "${CPPCODE}/:${container_home}:rw" -B "${RESEARCH}:${container_home}/research:rw" --pwd "${container_home}" "${SIF}" python research/driver.py approx-silh-bestk

@@ -13,7 +13,9 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <nlohmann/json.hpp>
+#ifdef USE_HDF5
 #include <highfive/H5Easy.hpp>
+#endif
 #include <chrono>
 
 #define DIVIDE 1
@@ -83,7 +85,9 @@ namespace Structures {
         int threads=1;
         double sampleSizeFullWithSampl; //0: local estimator
         //long long int sampleSizeDouble; 
-        std::vector<long long int> sampleSizeDouble; 
+        std::vector<long long int> sampleSizeDouble;
+        bool          globalOnly = false; // skip per-point Phase 2, return scalar only
+        long long int globalM    = -1;    // subsample size for fast global; -1 means all n
     };
 
 	struct AlgorithmResult{
@@ -180,14 +184,18 @@ namespace Structures {
     }
 
     std::vector<Structures::Point<double>> BuildDatasetRaw(std::string fname);
+#ifdef USE_HDF5
     std::vector<Structures::Point<double>> BuildDatasetRaw(H5Easy::File& datafile, AlgorithmParameters& params);
 	void LoadClustering(H5Easy::File& datafile, AlgorithmParameters& params, std::string path, std::vector<Structures::Point<double>>& pointset, std::string alg);
 	void dumpHDF5(std::vector<Point<double>>& pointset, H5Easy::File& outfile, int type=0);
+#endif
 
    // ---- General-purpose (non-experiment) I/O for standalone/library usage ----
 	// Reads a flat cluster-assignment vector: one integer cluster id (0..k-1) per line/row.
 	std::vector<int> LoadLabelsCSV(std::string fname);
+#ifdef USE_HDF5
 	std::vector<int> LoadLabelsHDF5(H5Easy::File& datafile, std::string path);
+#endif
 	// Turns a flat label vector into the per-cluster index lists AlgorithmParameters expects.
 	// Validates that every label is in [0,k) and exits with a clear error otherwise.
 	std::vector<std::vector<long long int>> BuildClusterAssignments(const std::vector<int>& labels, int k);

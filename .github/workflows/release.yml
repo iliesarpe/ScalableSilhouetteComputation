@@ -1,0 +1,87 @@
+name: Release
+
+# Triggered by pushing a version tag, e.g.:  git tag v0.1.0 && git push --tags
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  # -----------------------------------------------------------------------
+  # Build pre-compiled wheels via cibuildwheel
+  # -----------------------------------------------------------------------
+  build-wheels:
+    name: Wheels / ${{ matrix.os }} (${{ matrix.cibw_archs }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            cibw_archs: x86_64
+          - os: macos-14       # GitHub's arm64 runner
+            cibw_archs: arm64
+          - os: macos-13       # GitHub's x86_64 runner
+            cibw_archs: x86_64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pypa/cibuildwheel@v2.21
+        env:
+          CIBW_ARCHS: ${{ matrix.cibw_archs }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          # Unique artifact name per matrix leg so upload-artifact doesn't collide.
+          name: wheels-${{ matrix.os }}-${{ matrix.cibw_archs }}
+          path: wheelhouse/*.whl
+
+  # -----------------------------------------------------------------------
+  # Build source distribution (allows install from source on any platform)
+  # -----------------------------------------------------------------------
+  build-sdist:
+    name: Source distribution
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install build
+
+      - run: python -m build --sdist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+
+  # -----------------------------------------------------------------------
+  # Upload everything to PyPI via OIDC trusted publisher (no API token needed)
+  # -----------------------------------------------------------------------
+  publish:
+    name: Publish to PyPI
+    needs: [build-wheels, build-sdist]
+    runs-on: ubuntu-22.04
+    environment: pypi          # matches the environment name on PyPI's trusted publisher config
+    permissions:
+      id-token: write          # required for OIDC token exchange
+
+    steps:
+      # Collect all wheel artifacts into dist/
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: dist
+          merge-multiple: true
+
+      # Add the sdist alongside the wheels
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
