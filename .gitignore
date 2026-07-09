@@ -1,2 +1,19 @@
 parsing/
 CLAUDE.md
+
+# Generated quickstart output
+examples/out/
+examples/examples/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+src/silhouette_scalable/__pycache__/
+
+# Build artifacts
+*.so
+*.egg-info/
+dist/
+build/
+_skbuild/
