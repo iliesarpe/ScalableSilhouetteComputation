@@ -22,15 +22,16 @@ Requires Python ≥ 3.9 and NumPy. Pre-compiled wheels are available for Linux x
 
 ```python
 import numpy as np
+from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
 import silhouette_scalable as ss
 
-# X: (n, d) array of points — any array-like, converted to float64
-# labels: (n,) integer cluster assignments, 0-indexed
-X      = np.random.randn(10_000, 32)
-labels = np.random.randint(0, 10, size=10_000)
+# Create a dataset with real cluster structure and cluster it
+X, _ = make_blobs(n_samples=10_000, n_features=16, centers=8, random_state=0)
+labels = KMeans(n_clusters=8, n_init=5, random_state=0).fit_predict(X)
 
 # Per-point silhouette estimates — O(n) in the estimation step
-result = ss.compute_local(X, labels, distance="euclidean", t=64, seed=0)
+result = ss.compute_local(X, labels, t=64, seed=0)
 print(result["global_silhouette"])   # float in [-1, 1]
 print(result["local_silhouette"])    # list of n per-point values
 
@@ -39,7 +40,7 @@ result = ss.compute_global(X, labels, m=500, t=64, seed=0)
 print(result["global_silhouette"])
 
 # Exact silhouette — O(n²), only practical for small datasets (n ≲ 5 000)
-result = ss.compute_exact(X, labels)
+result = ss.compute_exact(X[:2000], labels[:2000])
 print(result["global_silhouette"])
 ```
 
