@@ -25,7 +25,7 @@ No data download required. The example runs on a synthetic dataset generated on 
 
 ```bash
 pip install silhouette-scalable matplotlib seaborn scikit-learn
-python examples/quickstart.py
+python examples/quickstart.py  # after cloning the repo
 ```
 
 This will:
@@ -37,9 +37,9 @@ This will:
 
 Optional arguments:
 ```bash
-python examples/quickstart.py --k-values 2 4 6 8 10   # custom k range
-python examples/quickstart.py --t 128                 # larger sample → more accurate estimates
-python examples/quickstart.py --plots-dir ./plots     # custom output directory
+python examples/quickstart.py  # after cloning the repo --k-values 2 4 6 8 10   # custom k range
+python examples/quickstart.py  # after cloning the repo --t 128                 # larger sample → more accurate estimates
+python examples/quickstart.py  # after cloning the repo --plots-dir ./plots     # custom output directory
 ```
 
 ---
@@ -93,7 +93,7 @@ All functions return a `dict`. The keys present depend on the function:
 
 We hide $log(nk/\delta)$ factor for simplicity, check the paper for the exact complexities.
 
-For per-point silhouette distributions and best-k selection plots, see [`examples/quickstart.py`](examples/quickstart.py).
+For per-point silhouette distributions and best-k selection plots, see [`examples/quickstart.py`](https://github.com/iliesarpe/ScalableSilhouetteComputation/blob/main/examples/quickstart.py).
 `compute_global` scales to datasets with tens of millions of points on commodity hardware.
 
 ### Distances
@@ -134,11 +134,11 @@ for k in range(2, 10):
     print(f"k={k}  silhouette={score:.3f}")
 ```
 
-A runnable version with per-cluster silhouette distribution plots is in [`examples/quickstart.py`](examples/quickstart.py):
+A runnable version with per-cluster silhouette distribution plots is in [`examples/quickstart.py`](https://github.com/iliesarpe/ScalableSilhouetteComputation/blob/main/examples/quickstart.py):
 
 ```bash
 pip install silhouette-scalable matplotlib seaborn scikit-learn
-python examples/quickstart.py
+python examples/quickstart.py  # after cloning the repo
 ```
 
 ---
